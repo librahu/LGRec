@@ -125,22 +125,23 @@ def read_data(path):
 class Config(object):
     def __init__(self):
         self.path = '../data/yelp'
-        self.batch_size = 256
-        self.embedding_dim = 256
-        self.hidden_dim = 256
-        self.user_num = 0
-        self.item_num = 0
-        self.user_length = 0
-        self.item_length = 0
-        self.label_size = 3
-        self.margin = 2.0
-        self.epochs = 100
-        self.topK = 10
-        self.l2 = 0.05
-        self.dropout_rate = 1.0
-        self.alpha = 0.1
-        self.beta = 0.01
-        self.learn_rate = 0.001
+        self.batch_size = 256       # The batch size
+        self.embedding_dim = 256    # The dimension of embedding layers
+        self.hidden_dim = 256       # The dimension of hidden layer of dense layers
+        self.user_num = 0           # The total number of items
+        self.item_num = 0           # The total number of users
+        self.user_length = 0        # The number of users' neighbors
+        self.item_length = 0        # The number of items' neighbors
+        self.label_size = 4         # The number of labels for multi-label classification  
+        self.margin = 2.0           # Margin; Refer to Eq.(12)
+        self.epochs = 100           # Max training epochs
+        self.topK = 10              # The length of ranklist
+        self.l2 = 0.05              # Regurlarization for dense layer
+        self.dropout_rate = 1.0     # Dropout rate; Useless parameter
+        self.alpha = 0.1            # Refer to Eq.(13) in paper
+        self.beta = 0.01            # Refer to Eq.(13) in paper
+        self.distance = 1           # 1: l1 normalization for Eq.(11) in paper; 2: l2 normalization for Eq.(11) in papers;
+        self.learn_rate = 0.001     # Learning rate
 
 class pRankModel(object):
     def __init__(self, config):
@@ -157,6 +158,7 @@ class pRankModel(object):
         label_size = config.label_size
         alpha = config.alpha
         beta = config.beta
+        distance = config.distance
 
         print 'Model config : '
         print 'Batch size = ', batch_size
@@ -338,12 +340,17 @@ class pRankModel(object):
         #output layer
         pos_output = tf.matmul(pos_relation_embedding, self.W_o) + self.b_o#tf.nn.sigmoid(tf.matmul(pos_relation_embedding, self.W_o) + self.b_o)
         neg_output = tf.matmul(neg_relation_embedding, self.W_o) + self.b_o#tf.nn.sigmoid(tf.matmul(neg_relation_embedding, self.W_o) + self.b_o)
-
-        #pos = tf.reduce_sum((pos_u_e_f + pos_relation_embedding - pos_v_e_f) ** 2, 1, keep_dims = True)
-        #neg = tf.reduce_sum((neg_u_e_f + neg_relation_embedding - neg_v_e_f) ** 2, 1, keep_dims = True)
-        pos = tf.reduce_sum(abs(pos_u_e_f + pos_relation_embedding - pos_v_e_f), 1, keep_dims = True)
-        neg = tf.reduce_sum(abs(neg_u_e_f + neg_relation_embedding - neg_v_e_f), 1, keep_dims = True)
-        self.prediction = pos
+        
+        if distance == 2:
+            pos = tf.reduce_sum((pos_u_e_f + pos_relation_embedding - pos_v_e_f) ** 2, 1, keep_dims = True)
+            neg = tf.reduce_sum((neg_u_e_f + neg_relation_embedding - neg_v_e_f) ** 2, 1, keep_dims = True)
+            self.prediction = pos
+        elif ditance == 1:
+            pos = tf.reduce_sum(abs(pos_u_e_f + pos_relation_embedding - pos_v_e_f), 1, keep_dims = True)
+            neg = tf.reduce_sum(abs(neg_u_e_f + neg_relation_embedding - neg_v_e_f), 1, keep_dims = True)
+            self.prediction = pos
+        else:
+            exit(1)
 
         self.trans_loss = tf.reduce_sum(tf.maximum(pos - neg + margin, 0))
 
