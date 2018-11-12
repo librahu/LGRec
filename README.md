@@ -18,3 +18,25 @@ Source code for CIKM paper "Local and Global Information Fusion for Top-N Recomm
 * scipy
 
 * tensorflow-gpu (1.2.1)
+
+# Reference
+
+@inproceedings{
+
+> author = {Binbin Hu, Chuan Shi, Wayne Xin Zhao and Tianchi Yang},
+ 
+> title = {Local and Global Information Fusion for Top-N Recommendation in Heterogeneous Information Network},
+ 
+> booktitle = {Proceedings of the 27th ACM International Conference on Information and Knowledge Management},
+ 
+> year = {2018},
+ 
+> url = {https://dl.acm.org/citation.cfm?id=3269278},
+ 
+> publisher = {ACM},
+
+> address = {Torino, Italy},
+
+> keywords = {Heterogeneous Information Network, Recommender System, Local and Global Information, Attention Mechanism},
+ 
+}
