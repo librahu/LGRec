@@ -1,0 +1,123 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{bm}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage[tight,footnotesize]{subfigure}
+
+%\usepackage{authblk}
+%\usepackage{booktabs} % For formal tables
+
+\newtheorem{myDef}{Definition}
+\newtheorem{exmp}{Example}
+\newcommand{\paratitle}[1]{\vspace{1.5ex}\noindent\textbf{#1}}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\aka}{\emph{a.k.a.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+\newcommand{\etal}{\emph{et al.}\xspace}
+\newcommand{\wrt}{\emph{w.r.t.}\xspace}
+\newcommand{\ignore}[1]{}
+
+% Copyright
+%\setcopyright{none}
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+%\setcopyright{rightsretained}
+%\setcopyright{usgov}
+%\setcopyright{usgovmixed}
+%\setcopyright{cagov}
+%\setcopyright{cagovmixed}
+
+\copyrightyear{2018} 
+\acmYear{2018} 
+\setcopyright{acmcopyright}
+\acmConference[CIKM '18]{The 27th ACM International Conference on Information and Knowledge Management}{October 22--26, 2018}{Torino, Italy}
+\acmBooktitle{The 27th ACM International Conference on Information and Knowledge Management (CIKM '18), October 22--26, 2018, Torino, Italy}
+\acmPrice{15.00}
+\acmDOI{10.1145/3269206.3269278}
+\acmISBN{978-1-4503-6014-2/18/10}
+\fancyhead{}
+
+% DOI
+%\acmDOI{10.475/123_4}
+
+% ISBN
+%\acmISBN{123-4567-24-567/08/06}
+
+%Conference
+%\acmConference[CIKM]{CIKM}{2018}{El
+%  Lingotto, Turin, Italy}
+%\acmYear{2018}
+%\copyrightyear{2018}
+
+
+%\acmArticle{4}
+%\acmPrice{15.00}
+
+
+
+% These commands are optional
+%\acmBooktitle{Transactions of the ACM Woodstock conference}
+
+\author{
+Binbin Hu$^\dag$,
+Chuan Shi$^\dag$$^*$,
+Wayne Xin Zhao$^\ddag$,
+Tianchi Yang$^\dag$
+}\thanks{*Corresponding Author}
+\affiliation{
+\institution{$^\dag$ Beijing University of Posts and Telecommunications, Beijing, China}
+\institution{$^\ddag$ School of Information, Renmin University of China, Beijing, China}
+}
+\email{{hubinbin, shichuan, yangtianchi}@bupt.edu.cn, batmanfly@gmail.com}
+
+\begin{document}
+
+\title{Local and Global Information Fusion for Top-$N$  \\ Recommendation in Heterogeneous Information Network}
+%\titlenote{Produces the permission block, and
+%  copyright information}
+%\subtitle{Extended Abstract}
+%\subtitlenote{The full version of the author's guide is available as
+%  \texttt{acmart.pdf} document}
+
+
+\begin{abstract}
+Since heterogeneous information network (HIN) is able to integrate complex information and contain rich semantics, there is a surge of HIN based recommendation in recent years. 
+%Heterogeneous information network is a natural and excellent method to model complex auxiliary information in modern recommender system. 
+Although existing methods have achieved performance improvement to some extent, they still face the following problems: how to extensively exploit and comprehensively explore the local and global information in HIN for recommendation. To address these issues, we propose a unified model LGRec to fuse local and global information for top-$N$ recommendation in HIN. 
+We firstly model most informative local neighbor information for users and items respectively with a co-attention mechanism. In addition, our model learns effective relation representations between users and items to capture rich information in HIN by optimizing a multi-label classification problem.
+Finally, we combine the two parts into an unified model for top-$N$ recommendation. 
+Extensive experiments on four real-world datasets demonstrate the effectiveness of the proposed model.
+\end{abstract}
+
+
+\keywords{Heterogeneous Information Network, Recommender System, Local and Global Information, Attention Mechanism}
+
+\settopmatter{printacmref=false, printfolios=false}
+
+\maketitle
+
+%{\fontsize{8.2pt} \selectfont
+{\textbf{ACM Reference Format:}\\
+Binbin Hu, Chuan Shi, Wayne Xin Zhao, Tianchi Yang. 2018. Local
+and Global Information Fusion for Top-N Recommendation in Heterogeneous
+Information Network. In The 27th ACM International Conference on
+Information and Knowledge Management (CIKM'18), October 22--26, 2018,
+Torino, Italy. ACM, New York, NY, USA, 4 pages. 
+https://doi.org/10.1145/3269206.3269278 
+} 
+
+\input{sec-intro}
+\input{sec-def}
+\input{sec-model}
+\input{sec-exp}
+\input{sec-con}
+
+\section{Acknowledgement}
+This work is supported in part by the National Natural Science Foundation of China (No. 61772082, 61502502, 61320106006, 61375058), the National Key Research and Development Program of China (2017YFB0803304), and the Beijing Municipal Natural Science Foundation (4182043, 4162032). 
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+
+\end{document}

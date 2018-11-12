@@ -1,0 +1,144 @@
+\section{The proposed model}
+In this paper, we present an unified model to fuse \emph{L}ocal and \emph{G}lobal information for top-$N$ \emph{Rec}ommendation in heterogenous information network, called \textbf{LGRec}. We present the overall architecture for the proposed model in Fig.~\ref{fig-model}(a). As we can see, our model flexibly utilizes the local neighbor information and apply a co-attention mechanism to construct more meaningful embeddings for users and items. And then we learn the relation representation through interactions between users and items based on MLP. Moreover, we utilize the learned relation to predict the meta-path based interaction distribution in HIN, which is modeled as a multi-label classification problem. Finally, we combine the two parts in an unified model and optimize it for top-$N$ recommendation.
+
+
+%In order to comprehensively utilize local information, we assume that the embedding of a user (item) is determined by its connected items (users). Since different items may have different contributions to the user, a co-attention mechanism is designed to automatically determine their weights. And then
+%we explore and exploit rich information and network structure in HIN which is the global information can be modeled as the relation between each user-item pair. Therefore a multi-label classification task is modeled to match the relation embdedding and distribution on meta paths. We present the overall architecture for the proposed model in Fig.~\ref{fig-model}(a). Finally, we combine the two parts in an unified model and optimize it for top-$N$ recommendation.
+
+%After obtaining the embedding of the user and item, a transfer mechanism is built to model the user, item and their relation. We believe that the relation is the combination of meta paths connecting the user and item, so a multi-label classification task is modeled to match the relation embdedding and distribution on meta paths.
+
+% We first introduce how to encode the representation of users and items with the local information, and then we explore and exploit rich information and network structure in HIN and model the global interaction information for each user-item pair. Final, we combine the two parts in an unified model and optimize it for top-$N$ recommendation
+%we model the heterogeneous information based relation between user and item pair. Finally, we combine the two parts into an unified model.
+
+\subsection{Local Information based Recommendation Model with Co-attention Mechanism} 
+First of all, we propose a basic local information based recommendation model, which learn embeddings of users (items) according to that of connecting items (users) with a co-attention mechanism.
+
+%we propose a basic model, which only takes in the local information (\ie neighborhood information) for top-$N$ recommendation.
+%As the first part, we only take the local information (\ie neighborhood information)
+
+\paratitle{Encoding user and item.}
+Each user (item) can be represented as a sequence of items (users) which have been interacted, \ie $\bm{p}_u \in \mathbb{R}^{K_1 \times 1}$ and $\bm{q}_v \in \mathbb{R}^{K_2 \times 1}$, where $K_1$ and $K_2$ are the number of neighbors of user $u$ and item $v$ representatively. 
+%Instead of constructing neighborhood by collecting all the direct neighbors in the network, which may not work well due to the unbalanced degree distribution of a vertex, we further propose to utilize a MF based model~\cite{rendle2009bpr} for ranking these direct neighbors, and select the top $K_1$ and $K_2$ for users' and items' neighborhood respectively. 
+Due to the unbalanced degree distribution of a vertex,
+%A straightforward way to construct neighborhood is to collect all the direct neighbors in the network given a target user $u$ or item $v$. However, such a method may not work well due to the unbalanced degree distribution of a vertex. 
+we propose to utilize a MF based model~\cite{rendle2009bpr} for ranking direct neighbors, and keep the top $K_1$ and $K_2$ neighbors as users' and items' neighborhood respectively. 
+%and choose the top $K_1$ and $K_2$ for users' and item's neighborhood respectively.
+%Following~\cite{he2017neural}, we set up  lookup layers, which correspond to two parameter matrices $\bm{P} \in \mathbb{R}^{|\mathcal{U}| \times d}$ and $\bm{Q} \in \mathbb{R}^{|\mathcal{V}| \times d}$, to transform each user and item into low-dimensional dense vector. Here $d$ is the dimension size of user and item embeddings, and $|\mathcal{U}|$ and $|\mathcal{V}|$ are the total number of users and items respectively. Consequently, we can encode local information of user $u$ and item $v$ into matrices as below,
+Following~\cite{he2017neural}, we set up  lookup layers to transform each user and item into low-dimensional dense vector. Therefore, we encode local information of user $u$ and item $v$ into $\bm{X}_u \in \mathbb{R}^{K_1 \times d}$ and $\bm{Y}_v \in \mathbb{R}^{K_2 \times d}$, where $d$ is the dimension of embedding.
+%\begin{equation}
+%\label{eq-user-neighor}
+%\bm{X}_u = \text{Look-up}(\bm{P}, \bm{p}_u),
+%\end{equation}
+%\begin{equation}
+%\label{eq-item-neighbor}
+%\bm{Y}_i = \text{Look-up}(\bm{Q}, \bm{q}_v).
+%\end{equation}
+%where $\bm{X}_u \in \mathbb{R}^{K_1 \times d}$ and $\bm{Y}_v \in \mathbb{R}^{K_2 \times d}$ are the neighborhood embedding matrices of users and items, representatively.
+
+% \begin{equation}
+%\mathbf{X}_u = \text{Look-up}(\mathbf{P}, \mathbf{p}_u),  \ \ \ \ \mathbf{Y}_v =  \text{Look-up}(\mathbf{Q}, \mathbf{q}_v).
+%\end{equation}
+
+\paratitle{Co-attention mechanism.}
+Since different items (users) have different importance to a user (item), we cannot treat them equally. And thus we propose to select the most informative local information for each user and item respectively and generate more meaningful representations of users and items. Given the local information embedding matrices of a user $\bm{X}_u \in \mathbb{R}^{d \times K_1}$ and an item $\bm{Y}_v \in \mathbb{R}^{d \times K_2}$, we calculate a co-attention matrix $\bm{M} \in \mathbb{R}^{K_1 \times K_2}$ between them. Each entry of $\bm{M}$ can be described as follows:
+\begin{equation}
+\bm{M}_{i,j} = F(\bm{X}_u^{(i)})\bm{A}G(\bm{Y}_v^{(j)}),
+\end{equation}
+where $\bm{A}$ is an attentive matrix. %$\bm{X}_u \in \mathbb{R}^{K_1 \times d}$ and $\bm{Y}_v \in \mathbb{R}^{K_2 \times d}$ are the local information embedding matrices of users and items, representatively. 
+$F(\cdot)$ and $G(\cdot)$ are neural network functions with multiple layers for users and items respectively.
+
+\paratitle{Generate embeddings.}
+After that, we conduct max pooling (MP) operations along rows and columns of $\bm{M}$ to generate the importance vectors for users and items respectively, which can be describe as follows:
+\begin{equation}
+\bm{a}^u_i = \text{MP}(\{\bm{M}_{ij}\}_{j = 1}^{K_2}),\ \ \ \ \ \bm{a}^v_i = \text{MP}(\{\bm{M}_{ji}\}_{j = 1}^{K_1}).
+\end{equation}
+%\begin{equation}
+%\bm{a}^v_i = \text{MP}(\{\bm{M}_{ji}\}_{j = 1}^{K_1}).
+%\end{equation}
+
+Next, we employ softmax function to normalize the above importance vectors and aggregate neighborhood information for final embeddings as follows:
+\begin{equation}
+\bm{x}_u = \bm{X}_u\bm{a}^u,\ \ \ \ \bm{y}_v = \bm{Y}_v\bm{a}^v.
+\end{equation}
+%\begin{equation}
+%\bm{y}_v = \bm{Y}_v\bm{a}^v.
+%\end{equation}
+
+\paratitle{Basic recommendation model.}
+Motivated by the translation mechanism in collaborative filtering~\cite{tay2018latent}, %we assume that the interactions between users and items in our model can also be described as translations in the representation space. 
+we preserve the translation mechanism among user and item representations. Hence, for each user-item pair $\langle u, v\rangle$, we define the scoring function as follows:
+\begin{equation}
+\label{eq-basic}
+s(u, v) = ||\bm{x}_u - \bm{y}_v||_2^2.
+\end{equation}
+
+\subsection{Modeling Global information with Multi-label Classification}
+Since each user and item pair can be connected by multiple meta-paths, the relation of a user and an item is the combination of composite interaction based on these meta-paths.
+%, which contain different semantics. We consider these connections as interactions between user-item pairs based on different meta-paths. 
+%Hence, in this part, we will model such interactions between users and items as well as the corresponding relation representation simultaneously. 
+We believe that the learned relation representation can not only capture the rich information and network structure in HIN, but also further predict the meta-path based interaction distribution between users and items. And thus, we can model the problem as the multi-label classification and integrate it into final unified objective.  
+
+
+%we will model the relation for each user and item based on heterogeneous information network. Our idea is to explore the rich information and network structure in HIN by capturing multiple meta-paths between user-item pairs and use them as prediction objectives simultaneously and jointly for learning of the relation representation.
+
+\paratitle{Meta-path based interaction.}
+In order to model the global information, we firstly obtain the interactions between the source and the target nodes based on meta-paths. Supposed we have a meta-path $\rho = (A_1, A_2, \ldots, A_l)$, where $A_i$ represents the node type. Then we can define a matrix $\bm{C}_{{A_i}{A_j}}$ as the adjacency matrix between type $A_i$ and type $A_j$. Then, we define the interaction matrix for meta-path $\rho$ is $\bm{I}^{\rho} = \bm{C}_{{A_1}{A_2}} \circ \bm{C}_{{A_2}{A_3}} \circ \ldots \circ \bm{C}_{{A_{l-1}}{A_l}}$. %For example, for the meta-path UMUM in fig.~\ref{fig-model}(b), $\bm{I}^{UMUM} = \bm{C}_{UM} \circ  \bm{C}^T_{UM}  \circ \bm{C}_{UM}$, where $\bm{C}_{UM}$ is the adjacency matrix between type U and type M. 
+%Each entry of matrix $\bm{I}^{UMUM}_{ij}$ represents whether there exist any interaction between the node $i$ with type U  and the node $j$ with type M based on meta-path UMUM.
+Each entry of matrix $\bm{I}^{\rho}_{ij}$ represents whether there exist any interaction between the source node $i$  and the target node $j$ based on meta-path $\rho$.
+
+\paratitle{Generating latent relation based on MLP.}
+Given the user-item pair $\langle u, v \rangle$, our model firstly applies the following step to learn a joint embedding of users and items:
+\begin{equation}
+\bm{h}_{u, v} = \bm{x}_u \oplus \bm{y}_v,
+\end{equation}
+where ``$\oplus$'' denotes the vector concatenation operation. We aim to generate latent relation for a user and an item through the composite interaction between them. 
+Following~\cite{he2017neural}, we feed $\bm{h}_{u, v}$ into a MLP component in order to implement a nonlinear function for modeling complicated the latent relation.
+\begin{equation}
+\bm{z} = \text{MLP}(\bm{h}_{u, v}),
+\end{equation}
+where the MLP component is implemented with two hidden layers with ReLU as the activation function.
+%Hence , we propose to apply the MLP to model user-item interactions. Generally, a MLP component can be constructed layer by layer. Formally, we set the input of MLP $\bm{z}_0 = \bm{h}_{u, v}$, and for $j = 1, \ldots, L$, we have:
+%\begin{equation}
+%\bm{z}_j = f(\bm{W}^T_j\bm{z}_{j - 1} + \bm{b}_j),
+%\end{equation}
+%where $\bm{W}_j$ and $\bm{b}_j$ are the weight matrix and bias for the $j$-th layer, respectively, and we choose ReLU as the activation function. As the output of MLP, we can obtain the latent relation for a user and an item $\bm{z} = \bm{z}_L$.
+
+\paratitle{Multi-label classification.}
+Since we obtain the relation representation (\ie $\bm{z}$) for a user-item pair (\ie $\langle u, v \rangle$), we could leverage the output vector to predict the probability of interactions between $u$ and $v$ based on each meta-path $\rho \in \mathcal{P}$. The probability can be generated as follows:
+%each meta-path $\rho \in \mathcal{P}$ between $u$ and $v$. 
+\begin{equation}
+\bm{p}_z = \bm{W}_o\bm{z} + \bm{b}_o,
+\end{equation}
+where $\bm{W}_o \in \mathbb{R}^{|\mathcal{P}| \times d}$ and $\bm{b}_o \in \mathbb{R}^{|\mathcal{P}| \times 1}$ are the weight matrix and bias respectively. $\bm{p}_z$ is the prediction vector of length $|\mathcal{P}|$ consisting of the probability of each meta-path based interaction between $u$ and $v$. Then we encode the interaction distribution based on multiple meta-paths between users and item as one-hot vector, denoted as $\bm{y} \in \mathbb{R}^{|\mathcal{P}| \times 1}$. Since we obtain the interaction matrix $\bm{I}^{\rho}$ for each meta-path $\rho$ as mentioned above, we formally define $\bm{y} = \{I^{\rho}_{uv} | \rho \in \mathcal{P}\}$ when giving a user $u$ and an item $v$. In other words, each entry of $\bm{y}$ represents whether corresponding meta-path based interaction exists between user $u$ and item $v$. We believe that the learned relation representation can predict the meta-path based interaction distribution between users and items, which can be naturally modeled as a multi-label classification problem. Hence, we use the sigmoid cross entropy with logits as our objective to overcome this issue, which can be described as follows:
+%To preserve the heterogeneous information, we use the sigmoid cross entropy with logits as our cost function, which can be described as follows:
+%Hence, we could choose to minimize the KL-divergence of two probability distributions for preserving the heterogenous information. The objective can be described as follows:
+\begin{eqnarray}
+\label{eq-relation}
+\ell_{mc}(\bm{y}) &=& -\bm{y} * \log(\sigma(\bm{p}_z)) - (1 - \bm{y}) * \log(1 - \sigma(\bm{p}_z)) \nonumber \\
+&=& \bm{p}_z - \bm{p}_z * \bm{y} + \log(1 + exp(-\bm{p}_z)).
+\end{eqnarray}
+%where $\sigma(x)$is the sigmoid function defined as $\sigma(x) = \frac{1}{1+exp(-x)}$.
+%\begin{equation}
+%\label{eq-relation}
+%\pounds_{mc}(y) = \text{KL-divergence}(\bm{p}_r,\bm{y})
+%\end{equation}
+\subsection{Unified Model}
+Following \cite{tay2018latent}, we consider the global heterogeneous information based relation into recommendation. For each user-item pair $\langle u, v\rangle$, we learn the HIN based relation $\bm{z}$, and we extend the original scoring function (Eq.~\ref{eq-basic}) as:
+\begin{equation}
+s(u, v, \bm{z}) = ||\bm{x}_u + \bm{z} - \bm{y}_v||_2^2.
+\end{equation}
+
+And then, we adopt the hinge loss for optimization. For each positive user-item pair $\langle u^+, v^+\rangle$, we sample a negative pair denoted as $\langle u^-, v^-\rangle$. As mentioned above, we can learn corresponding relation representation $\bm{z}^+$ and $\bm{z}^-$, respectively. The hinge loss is defined as follows:
+%And then, we adopt the hinge loss for optimization. For each positive user-item pair $\langle u^+, v^+\rangle$, and sampled negative pair denoted $\langle u^-, v^-\rangle$ as well as learned corresponding relation representation $\bm{z}^+$ and $\bm{z}^-$, respectively. The hinge loss is defined as follows:
+\begin{equation}
+\label{eq-trans}
+\ell_{trans} = max(0, \lambda + s(u^+, v^+, \bm{z}^+) - s(u^-, v^-, \bm{z}^-)),
+\end{equation}
+where $\lambda > 0$ is the margin hyper-parameter.
+
+To preserve the translation mechanism among user's and item's representation, and match relation representation with interaction distribution based on meta-paths, we combine the objective in Eq.~\ref{eq-relation} and Eq.~\ref{eq-trans} and proposed an unified recommendation model. For each $\langle u^+, v^+, \bm{y}^+\rangle$ and its negative sample $\langle u^-, v^-, \bm{y}^-\rangle$, the model jointly optimizes the objective as follows:
+\begin{equation}
+\ell = \ell_{trans} + \alpha[\ell_{mc}(\bm{y}^+) + \ell_{mc}(\bm{y}^-)] + \beta\ell_{reg}.
+\end{equation}
+Here, we introduce two hyper-parameters $\alpha$ and $\beta$ to balance the weights of different parts. Besides, $\ell_{reg}$ is an $L_2$-norm regularizer to prevent overfitting. To optimize our model, we perform minibatch
+Adam with a batch size of 256. The learning rate is tuned amongst \{0.0001, 0.0005, 0.001\}. The margin $\lambda$ is tuned amongst \{0.1, 0.5, 1.0, 2.0\}. And we set $K_1 = K_2 = 100$, $\alpha = 0.1$, $\beta = 0.001$ and $d = 128$. In addition, we use the meta-paths reported in Table~\ref{tab_Data}.

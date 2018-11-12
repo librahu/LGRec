@@ -1,0 +1,8 @@
+%\section{preliminary}
+%\paratitle{Implicit Feedback.}
+%In this paper, we consider the recommendation task targeting for implicit feedback. With $n$ users $\mathcal{U} = \{u_1, \ldots, u_n\}$ and $m$
+%items $\mathcal{V} = \{v_1, \ldots, v_m\}$, we define each entry $r_{u, v}$ in the user implicit feedback matrix $\bm{R} \in \mathbb{R}^{n \times m}$ as follows: $r_{u, v} = 1$ when $\langle u, v \rangle$ interaction is observed, and $r_{u, v} = 0$ otherwise. Here the value of 1 in the matrix $\bm{R}$ indicates the interaction result between a user and an item, e.g., whether a user has watched or rated a movie. Top-$N$ recommendation task is
+%more common in practice, since implicit feedback is easier to obtain.
+
+%\paratitle{Heterogeneous information network.}
+%The recently emerging HIN~\cite{shi2017survey} is a flexible way to model complex and heterogeneous auxiliary data in recommender systems. Particularly, a HIN is a special kind of information network, which either contains multiple types of objects or multiple types of links. A HIN example of movie recommender system is shown in Fig.~\ref{fig-model}. In addition, meta-path~\cite{shi2017survey}, a semantic sequence connecting objects, can effectively explore rich information  and network structure in HIN. In Fig.~\ref{fig-model}, the meta-path $User-User$ (UU) indicates friendship between two users, while the meta-path $User-Movie-User$ (UMU) indicates the co-watch relation between users. Recently, HIN has been adopted in recommender systems for characterizing complex and heterogenous recommendation settings. Many efforts~\cite{zhao2017meta} have been made for HIN based recommendation, while they tend to focus on rating prediction.
