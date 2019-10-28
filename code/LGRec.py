@@ -124,7 +124,7 @@ def read_data(path):
 
 class Config(object):
     def __init__(self):
-        self.path = '../data/yelp'
+        self.path = '../data/ml-100k'
         self.batch_size = 256       # The batch size
         self.embedding_dim = 256    # The dimension of embedding layers
         self.hidden_dim = 256       # The dimension of hidden layer of dense layers
