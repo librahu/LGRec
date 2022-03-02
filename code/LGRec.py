@@ -185,7 +185,7 @@ class pRankModel(object):
                                          shape = [item_num, embedding_dim],
                                          initializer = tf.contrib.layers.xavier_initializer(uniform = False))
 
-        #pos_u_e = tf.nn.l2_normalize(tf.nn.embedding_lookup(self.user_embedding, self.pos_u), 2)
+        #pos_u_e = tf.nn.l2_normalize(tf.nn.embedding_lookup(self.item_embedding, self.pos_u), 2)
         pos_u_e = tf.nn.embedding_lookup(self.user_embedding, self.pos_u)
         pos_u_d = tf.layers.dense(inputs = pos_u_e,
                            units = hidden_dim,
@@ -204,7 +204,7 @@ class pRankModel(object):
                            name = 'user_dense_2')
                            
         #pos_v_e = tf.nn.l2_normalize(tf.nn.embedding_lookup(self.item_embedding, self.pos_v), 2)
-        pos_v_e = tf.nn.embedding_lookup(self.item_embedding, self.pos_v)
+        pos_v_e = tf.nn.embedding_lookup(self.user_embedding, self.pos_v)
         pos_v_d = tf.layers.dense(inputs = pos_v_e,
                            units = hidden_dim,
                            activation = tf.nn.relu,
@@ -221,7 +221,7 @@ class pRankModel(object):
                            name = 'item_dense_2')
                            
         #neg_u_e = tf.nn.l2_normalize(tf.nn.embedding_lookup(self.user_embedding, self.neg_u), 2)
-        neg_u_e = tf.nn.embedding_lookup(self.user_embedding, self.neg_u)
+        neg_u_e = tf.nn.embedding_lookup(self.item_embedding, self.neg_u)
         neg_u_d = tf.layers.dense(inputs = neg_u_e,
                            units = hidden_dim,
                            activation = tf.nn.relu,
@@ -239,7 +239,7 @@ class pRankModel(object):
         
 
         #neg_v_e = tf.nn.l2_normalize(tf.nn.embedding_lookup(self.item_embedding, self.neg_v), 2)
-        neg_v_e = tf.nn.embedding_lookup(self.item_embedding, self.neg_v)
+        neg_v_e = tf.nn.embedding_lookup(self.user_embedding, self.neg_v)
         neg_v_d = tf.layers.dense(inputs = neg_v_e,
                            units = hidden_dim,
                            activation = tf.nn.relu,
